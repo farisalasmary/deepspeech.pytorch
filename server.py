@@ -59,7 +59,8 @@ def main():
     torch.set_grad_enabled(False)
     device = torch.device("cuda" if args.cuda else "cpu")
     model = load_model(device, args.model_path, args.half)
-
+    model.eval() # set model to evaluation mode
+    
     if args.decoder == "beam":
         from decoder import BeamCTCDecoder
 
