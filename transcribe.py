@@ -50,7 +50,16 @@ def transcribe(audio_path, spect_parser, model, decoder, device, use_half):
     if use_half:
         spect = spect.half()
     input_sizes = torch.IntTensor([spect.size(3)]).int()
-    out, output_sizes = model(spect, input_sizes)
+    
+    # Do NOT compute gradient in inference to save GPU memory
+    with torch.no_grad():
+        input_sizes = torch.IntTensor([spect.size(3)]).int()
+        out, output_sizes = model(spect, input_sizes)
+    
+    # free the GPU memory
+    del spect
+    torch.cuda.empty_cache()
+    
     decoded_output, decoded_offsets = decoder.decode(out, output_sizes)
     return decoded_output, decoded_offsets
 
